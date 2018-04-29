@@ -10,6 +10,7 @@
 #include <random>
 #include <functional>
 #include <thread>
+#include <fstream>
 #include <stdlib.h>
 #include <math.h>
 
@@ -31,6 +32,8 @@ float   RandomFloat(float a, float b);
 int     RandomInt(int a, int b);
 
 void    set_func_arry();
+
+std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
 
 std::vector <std::function<float(float,float,float)>> functions; // global list of function pointers
 
@@ -211,6 +214,19 @@ float func_sin_1(float sign, float k,  float x)
 float func_exp_1(float sign, float k,  float x)
 {
     return sign*pow(x,k);
+}
+
+std::vector<std::vector<float>> loadTrainingData(std::string fileAdr)
+{
+    std::string line;
+    std::string buf;
+
+    std::ifstream trainingFile(fileAdr);
+
+    if (trainingFile.is_open())
+    {
+
+    }
 }
 
 
