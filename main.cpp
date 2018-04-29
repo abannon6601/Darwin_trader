@@ -1,3 +1,5 @@
+// Random crashes when not running in debugger
+
 #include <iostream>
 #include <vector>
 #include <random>
@@ -86,6 +88,14 @@ public:
             genes.push_back(this->newGene());
         }
     }
+    ~genome()
+    {
+        // delete all the genes
+        for(int i = 0; i < GENOME_LENGTH; i++)
+        {
+            delete(genes[i]);
+        }
+    }
 
     // mutate the genome
     void mutate(float rand_lvl) // rand_lvl dictates how much we mutate by. 1 is complete unrestained, 0  is none
@@ -141,15 +151,19 @@ private:
 
 int main()
 {
+    std::cout << "DARWIN_TRADER - Running" << std::endl;
+
     srand(time(NULL));  // seed RNG
 
     set_func_arry();
 
-    genome mytestgenome;
+    genome* mytestgenome = new genome;
 
-    std::cout << "DARWIN_TRADER - Running" << std::endl;
+    std::cout << "DARWIN_TRADER - Cleaning up" << std::endl;
 
+    //delete(mytestgenome);
 
+    std::cout << "DARWIN_TRADER - End" << std::endl;
     return 0;
 }
 
