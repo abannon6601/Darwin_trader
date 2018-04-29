@@ -1,4 +1,9 @@
-// Random crashes when not running in debugger
+/*
+ * Issues: none
+ *
+ *
+ *
+ */
 
 #include <iostream>
 #include <vector>
@@ -40,7 +45,28 @@ class gene
     int dataIndex;  // index of the data vector this gene operates on
     // ^ this is only held as a record. When the gene is to be passed data this should be used to determine what data
 
+
     public:
+
+    gene()
+    {
+        // set sign
+        if(RandomInt(0,100) % 2 == 1)
+            sign = (float) -1;
+        else
+            sign = (float) 1;
+
+        //set k
+        k = RandomFloat(-1.0f, 1.0f);
+
+        //set dataIndex
+        dataIndex = RandomInt(0,X);
+
+        int accessInt = RandomInt(0,functions.size() - 1);
+        //std::cout << "DEBUG: acess int: " << accessInt << " functions size: " << functions.size() << std::endl;
+        gene_func = functions[accessInt];
+
+    }
 
 
     void set_sign(float in_sign)
@@ -55,10 +81,12 @@ class gene
     {
         gene_func = new_func;
     }
+    /*  this should never be used
     void set_dataIndex(int newIndex)
     {
         dataIndex = newIndex;
     }
+    (*/
 
     int get_dataIndex()
     {
@@ -85,17 +113,20 @@ public:
         // fill up the genome with random genes
         for(int i = 0; i < GENOME_LENGTH; i++)
         {
-            genes.push_back(this->newGene());
+            //genes.push_back(newGene());
+            genes.push_back(new gene);
         }
     }
     ~genome()
     {
         // delete all the genes
-        for(int i = 0; i < GENOME_LENGTH; i++)
+        for(int i = 0; i < genes.size(); i++)
         {
             delete(genes[i]);
         }
     }
+
+
 
     // mutate the genome
     void mutate(float rand_lvl) // rand_lvl dictates how much we mutate by. 1 is complete unrestained, 0  is none
@@ -122,30 +153,6 @@ public:
         return result;
     }
 
-private:
-
-    gene* newGene()  // generated a new random gene
-    {
-        gene* proc_gene = new gene;
-
-        // set sign
-        if(RandomInt(0,100) % 2 == 1)   // random yes/no
-            proc_gene->set_sign((float) -1);
-        else
-            proc_gene->set_sign((float) 1);
-
-        //set k
-        proc_gene->set_k(RandomFloat(-1.0f, 1.0f));
-
-        //set dataIndex
-        proc_gene->set_dataIndex(RandomInt(0,X));
-
-        // set a random function from functions
-        proc_gene->set_gene_func(functions[RandomInt(0,functions.size())]);
-
-        return proc_gene;
-    }
-
 };
 
 
@@ -153,15 +160,15 @@ int main()
 {
     std::cout << "DARWIN_TRADER - Running" << std::endl;
 
+    set_func_arry(); // setup the function array
     srand(time(NULL));  // seed RNG
 
-    set_func_arry();
+    std::vector <std::function<float(float,float,float)>> mydebugfunctions = functions;
 
     genome* mytestgenome = new genome;
 
     std::cout << "DARWIN_TRADER - Cleaning up" << std::endl;
-
-    //delete(mytestgenome);
+    delete(mytestgenome);
 
     std::cout << "DARWIN_TRADER - End" << std::endl;
     return 0;
