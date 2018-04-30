@@ -6,6 +6,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <random>
 #include <functional>
@@ -14,26 +15,22 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <algorithm>
 
 
 // ----------------------global constant delcrations--------------------------------------------------------------------
 
-const int X = 3;              // X is the length of the data (how many variables we consider)
-#define MAX_THREADS 4;      // max number of threads the program will use (could switch to system value later)
-const int GENOME_LENGTH = 4;  // length of each genome
+const int X = 5;                    // X is the length of the data (how many variables we consider)
+const int MAX_THREADS = 4;          // max number of threads the program will use (could switch to system value later)
+const int GENOME_LENGTH = 4;        // length of each genome
+const int POP_SIZE = 100;           // size of each population
+const int SEED_SIZE = POP_SIZE/10;  // how much of each population retained between
 
 //----------------------------------------------------------------------------------------------------------------------
 
 
-float   func_sin_1(float sign, float k, float x);
-float   func_exp_1(float sign, float k,  float x);
-
 float   RandomFloat(float a, float b);
 int     RandomInt(int a, int b);
-
-void    set_func_arry();
-
-std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
 
 std::vector <std::function<float(float,float,float)>> functions; // global list of function pointers
 
@@ -107,9 +104,13 @@ class gene
 class genome
 {
 
+
+
 public:
 
-    std::vector <gene*> genes;  // hold all the genes
+    std::vector <gene*> genes;  // hold all the gene
+
+    float error = 0;    // global average error of the gene from all training data
 
     genome()
     {
@@ -158,6 +159,14 @@ public:
 
 };
 
+float   func_sin_1(float sign, float k, float x);
+float   func_exp_1(float sign, float k,  float x);
+
+void    set_func_arry();
+
+bool    compareByError(const genome *a, const genome *b);
+
+std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
 
 int main()
 {
@@ -166,14 +175,54 @@ int main()
     set_func_arry(); // setup the function array
     srand(time(NULL));  // seed RNG
 
-    std::vector <std::function<float(float,float,float)>> mydebugfunctions = functions;
 
-    genome* mytestgenome = new genome;
+    // load training data
+    std::vector<std::vector<float>> trainingData = loadTrainingData("training_data.txt");
 
-    std::cout << "DARWIN_TRADER - Cleaning up" << std::endl;
-    delete(mytestgenome);
 
-    std::cout << "DARWIN_TRADER - End" << std::endl;
+    // create a population
+    std::vector<genome*> population;
+    for(int i = 0; i < POP_SIZE; i++)
+    {
+        population.push_back(new genome);
+    }
+
+
+    // test a population
+
+    float result = 0;
+    float real = 0;
+
+    for(int j = 0; j < trainingData.size() - 1; j++)    // we have to exclude the last set because at each stage we need to have a value of "true" which is in the n+1 position
+    {
+        for(int i = 0; i < population.size(); i++)
+        {
+            //std::cout<<"Result of Genome " << i << " is: " << population[i]->produce(trainingData[j]) << std::endl;
+            result = population[i]->produce(trainingData[j]);
+            real = trainingData[j+1][4];  // look at the next true data value
+            population[i]->error += abs(real - result);
+        }
+    }
+
+    // sort the population lowest error at the front
+    sort(population.begin(), population.end(), compareByError);
+
+    // cull the population. remove all but the best SEED_SIZE genomes
+    for(int i = SEED_SIZE; i < population.size(); i++)
+    {
+        delete(population[i]);
+    }
+    population.erase(population.begin() + SEED_SIZE, population.end());
+
+
+
+
+    for(int i = 0; i < population.size(); i++)
+    {
+        delete(population[i]);
+    }
+
+    std::cout << "DARWIN_TRADER - Ended" << std::endl;
     return 0;
 }
 
@@ -208,25 +257,58 @@ int RandomInt(int a, int b)
 
 float func_sin_1(float sign, float k,  float x)
 {
-    return sign*sin(k*x);
+    float result = sign*sin(k*x);
+
+    if(isnan(result))
+        result = 0;
+
+    return result;
 }
 
 float func_exp_1(float sign, float k,  float x)
 {
-    return sign*pow(x,k);
+    float result = sign*pow(x,k);
+
+    if(isnan(result))
+        result = 0;
+
+    return result;
 }
 
+//-------------other----------------------------------------------------------------------------------------------------
+
+//load training data from a text file
 std::vector<std::vector<float>> loadTrainingData(std::string fileAdr)
 {
+    std::vector<std::vector<float>> fileData;
+
     std::string line;
     std::string buf;
+    std::string::size_type sz;
 
     std::ifstream trainingFile(fileAdr);
 
     if (trainingFile.is_open())
     {
+        while (getline (trainingFile,line))   // iterate down the entire file
+        {
+            std::stringstream ss(line);
+            std::vector<float> elements;
 
+            while (ss >> buf)
+                elements.push_back(stof(buf,&sz));
+
+            fileData.push_back(elements);
+        }
     }
+
+    return fileData;
+}
+
+//sorting function for comparing genomes
+bool compareByError(const genome *a, const genome *b)
+{
+    return a->error < b->error;
 }
 
 
