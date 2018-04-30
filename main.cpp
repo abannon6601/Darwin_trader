@@ -98,13 +98,15 @@ class gene
         return gene_func(sign, k, x);
     }
 
+    void mutate(float mut_lvl)  // mutate the gene (mut_level between 0.5-0.000001)
+    {
+        k = k * (RandomFloat(-1, 1)*mut_lvl);
+    }
 
 };
 
 class genome
 {
-
-
 
 public:
 
@@ -128,19 +130,6 @@ public:
         {
             delete(genes[i]);
         }
-    }
-
-
-
-    // mutate the genome
-    void mutate(float rand_lvl) // rand_lvl dictates how much we mutate by. 1 is complete unrestained, 0  is none
-    {
-        // TODO
-        // go through each gene
-        // for each
-        //
-        // decide if we're replacing completely
-        // if not, tweak the scaling function
     }
 
     // run the genome on a data vector
@@ -168,6 +157,8 @@ bool    compareByError(const genome *a, const genome *b);
 
 std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
 
+genome* gen_genome_from_seed(genome* seed, float mut_lvl);
+
 int main()
 {
     std::cout << "DARWIN_TRADER - Running" << std::endl;
@@ -187,32 +178,52 @@ int main()
         population.push_back(new genome);
     }
 
+    float mut_lvl = 0.5f;   // start the mutation at 50%
 
-    // test a population
-
-    float result = 0;
-    float real = 0;
-
-    for(int j = 0; j < trainingData.size() - 1; j++)    // we have to exclude the last set because at each stage we need to have a value of "true" which is in the n+1 position
+    while(mut_lvl > 0)
     {
+        // test a population
+
+        float result = 0;
+        float real = 0;
+
+        for(int j = 0; j < trainingData.size() - 1; j++)    // we have to exclude the last set because at each stage we need to have a value of "true" which is in the n+1 position
+        {
+            for(int i = 0; i < population.size(); i++)
+            {
+                //std::cout<<"Result of Genome " << i << " is: " << population[i]->produce(trainingData[j]) << std::endl;
+                result = population[i]->produce(trainingData[j]);
+                real = trainingData[j+1][4];  // look at the next true data value
+                population[i]->error += abs(real - result);
+            }
+        }
+
+        // sort the population lowest error at the front
+        sort(population.begin(), population.end(), compareByError);
+
+        // cull the population. remove all but the best SEED_SIZE genomes
+        for(int i = SEED_SIZE; i < population.size(); i++)
+        {
+            delete(population[i]);
+        }
+        population.erase(population.begin() + SEED_SIZE, population.end());
+
+        // create new genomes from the seeds left in the population
+        std::vector<genome*> newTrousers; // new genomes created from seeds
         for(int i = 0; i < population.size(); i++)
         {
-            //std::cout<<"Result of Genome " << i << " is: " << population[i]->produce(trainingData[j]) << std::endl;
-            result = population[i]->produce(trainingData[j]);
-            real = trainingData[j+1][4];  // look at the next true data value
-            population[i]->error += abs(real - result);
+            for(int j = 0; j < SEED_SIZE - 1; j++)  // "-1" needed as we're going to leave the seed in place
+                newTrousers.push_back(gen_genome_from_seed(population[i],mut_lvl)); // CHANGE MUT_LVL
+            population[i]->error = 0;   // reset the error for the next run
         }
+
+        // copy new genes into the population
+        for(int i = 0; i < newTrousers.size(); i++)
+            population.push_back(newTrousers[i]);
+
+        mut_lvl = mut_lvl - 0.1;
     }
 
-    // sort the population lowest error at the front
-    sort(population.begin(), population.end(), compareByError);
-
-    // cull the population. remove all but the best SEED_SIZE genomes
-    for(int i = SEED_SIZE; i < population.size(); i++)
-    {
-        delete(population[i]);
-    }
-    population.erase(population.begin() + SEED_SIZE, population.end());
 
 
 
@@ -303,6 +314,41 @@ std::vector<std::vector<float>> loadTrainingData(std::string fileAdr)
     }
 
     return fileData;
+}
+
+// generate a mutated genome from a given seed genome and mutation level
+genome* gen_genome_from_seed (genome* seed, float mut_lvl)
+{
+    // TODO
+    // go through each gene
+    // for each
+    //
+    // decide if we're replacing completely
+    // if not, tweak the scaling function
+    float decidor;
+    std::vector<gene*> seed_genes = seed->genes;
+
+    for(int i =0; i < seed_genes.size(); i++)
+    {
+        decidor = RandomFloat(0, 1);
+        if(decidor > mut_lvl)
+        {   // replace the gene
+            delete(seed_genes[i]);                    // TODO MEMORY LEAK
+            seed_genes.erase(seed_genes.begin() + i);
+            seed_genes.push_back(new gene);
+        }
+        else
+        {
+            seed_genes[i]->mutate(mut_lvl);  // mutate the k-value
+        }
+    }
+
+    // create a new genome and copy the new genes into it
+    genome* result_genome = new genome;
+    result_genome->genes = seed_genes;
+
+    return result_genome;
+
 }
 
 //sorting function for comparing genomes
