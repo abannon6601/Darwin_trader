@@ -1,6 +1,8 @@
 /*
  * Issues: none
  *
+ * todo:
+ *  badly needs threading
  *
  *
  */
@@ -20,10 +22,10 @@
 
 // ----------------------global constant delcrations--------------------------------------------------------------------
 
-const int X = 5;                    // X is the length of the data (how many variables we consider)
+const int X = 2;                    // X is the length of the data (how many variables we consider)
 const int MAX_THREADS = 4;          // max number of threads the program will use (could switch to system value later)
-const int GENOME_LENGTH = 6;        // length of each genome
-const int POP_SIZE = 100;           // size of each population
+const int GENOME_LENGTH = 3;        // length of each genome
+const int POP_SIZE = 250;           // size of each population
 const int SEED_SIZE = POP_SIZE/10;  // how much of each population retained between
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -150,6 +152,7 @@ public:
 
 float   func_sin_1(float sign, float k, float x);
 float   func_exp_1(float sign, float k,  float x);
+float func_lin_1(float sign, float k,  float x);
 
 void    set_func_arry();
 
@@ -158,6 +161,8 @@ bool    compareByError(const genome *a, const genome *b);
 std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
 
 genome* gen_genome_from_seed(genome* seed, float mut_lvl);
+
+genome* growGenome(std::vector<std::vector<float>> trainingData);
 
 int main()
 {
@@ -170,73 +175,9 @@ int main()
     // load training data
     std::vector<std::vector<float>> trainingData = loadTrainingData("training_data.txt");
 
+    genome* working_gennome = new genome;
+    *working_gennome = *growGenome(trainingData);
 
-    // create a population
-    std::vector<genome*> population;
-    for(int i = 0; i < POP_SIZE; i++)
-    {
-        population.push_back(new genome);
-    }
-
-    float mut_lvl = 0.5f;   // start the mutation at 50%
-
-    while(mut_lvl > 0)
-    {
-        // test a population
-
-        float result = 0;
-        float real = 0;
-
-        for(int j = 0; j < trainingData.size() - 1; j++)    // we have to exclude the last set because at each stage we need to have a value of "true" which is in the n+1 position
-        {
-            for(int i = 0; i < population.size(); i++)
-            {
-                //std::cout<<"Result of Genome " << i << " is: " << population[i]->produce(trainingData[j]) << std::endl;
-                result = population[i]->produce(trainingData[j]);
-                real = trainingData[j+1][4];  // look at the next true data value
-                population[i]->error += abs(real - result);
-            }
-        }
-
-        // sort the population lowest error at the front
-        sort(population.begin(), population.end(), compareByError);
-
-        // cull the population. remove all but the best SEED_SIZE genomes
-        for(int i = SEED_SIZE; i < population.size(); i++)
-        {
-            delete(population[i]);
-        }
-        population.erase(population.begin() + SEED_SIZE, population.end());
-
-        if(mut_lvl < 0.1)
-        {
-            std::cout<<std::endl;
-        }
-
-        // create new genomes from the seeds left in the population
-        std::vector<genome*> newTrousers; // new genomes created from seeds
-        for(int i = 0; i < population.size(); i++)
-        {
-            for(int j = 0; j < SEED_SIZE - 1; j++)  // "-1" needed as we're going to leave the seed in place
-                newTrousers.push_back(gen_genome_from_seed(population[i],mut_lvl)); // CHANGE MUT_LVL
-            population[i]->error = 0;   // reset the error for the next run
-        }
-
-        // copy new genes into the population
-        for(int i = 0; i < newTrousers.size(); i++)
-            population.push_back(newTrousers[i]);
-
-        mut_lvl = mut_lvl - 0.01;
-    }
-
-
-
-
-
-    for(int i = 0; i < population.size(); i++)
-    {
-        delete(population[i]);
-    }
 
     std::cout << "DARWIN_TRADER - Ended" << std::endl;
     return 0;
@@ -249,6 +190,7 @@ void set_func_arry()
 {
     functions.push_back(func_exp_1);
     functions.push_back(func_sin_1);
+    functions.push_back(func_lin_1);
 }
 
 
@@ -284,6 +226,16 @@ float func_sin_1(float sign, float k,  float x)
 float func_exp_1(float sign, float k,  float x)
 {
     float result = sign*pow(x,k);
+
+    if(isnan(result))
+        result = 0;
+
+    return result;
+}
+
+float func_lin_1(float sign, float k,  float x)
+{
+    float result = sign*(k*x);
 
     if(isnan(result))
         result = 0;
@@ -363,6 +315,95 @@ genome* gen_genome_from_seed (genome* seed, float mut_lvl)
 bool compareByError(const genome *a, const genome *b)
 {
     return a->error < b->error;
+}
+
+// takes a matrix of training data and returns an optimised genome
+genome* growGenome(std::vector<std::vector<float>> trainingData)
+{
+    std::vector<float> errors;
+
+    // create a population
+    std::vector<genome*> population;
+    for(int i = 0; i < POP_SIZE; i++)
+    {
+        population.push_back(new genome);
+    }
+
+    float mut_lvl = 1;   // start the mutation at 50%
+
+    int breakout = 0;   // used to stop stagnation;
+    int allowed_breakouts = 150;
+    int breakouts = 0;
+
+    while(mut_lvl > 0)
+    {
+        // test a population
+
+        float result = 0;
+        float real = 0;
+
+        for(int j = 0; j < trainingData.size() - 1; j++)    // we have to exclude the last set because at each stage we need to have a value of "true" which is in the n+1 position
+        {
+            for(int i = 0; i < population.size(); i++)
+            {
+                result = population[i]->produce(trainingData[j]);
+                real = trainingData[j+1][1];  // look at the next true data value
+                population[i]->error += abs(real - result);
+            }
+        }
+
+        // sort the population lowest error at the front
+        sort(population.begin(), population.end(), compareByError);
+
+        // cull the population. remove all but the best SEED_SIZE genomes
+        for(int i = SEED_SIZE; i < population.size(); i++)
+        {
+            delete(population[i]);
+        }
+        population.erase(population.begin() + SEED_SIZE, population.end());
+
+
+        if(errors.size() > 0)
+            if(population[0]->error == errors.back())
+                breakout++;
+
+        if(breakout > 5 && breakouts < allowed_breakouts)
+        {
+            breakouts++;
+            mut_lvl = 1;    // start at a higher mutation again
+        }
+
+
+        errors.push_back(population[0]->error);
+        //std::cout<<"Darwin_Trader: Traingin - best error: " << population[0]->error << std::endl;
+
+        // create new genomes from the seeds left in the population
+        std::vector<genome*> newTrousers; // new genomes created from seeds
+        for(int i = 0; i < population.size(); i++)
+        {
+            for(int j = 0; j < SEED_SIZE - 1; j++)  // "-1" needed as we're going to leave the seed in place
+                newTrousers.push_back(gen_genome_from_seed(population[i],mut_lvl)); // CHANGE MUT_LVL
+            population[i]->error = 0;   // reset the error for the next run
+        }
+
+        // copy new genes into the population
+        for(int i = 0; i < newTrousers.size(); i++)
+            population.push_back(newTrousers[i]);
+
+        mut_lvl = mut_lvl - 0.01;
+    }
+
+    genome* result_genome = new genome; // copy the result into new memory
+    *result_genome = *population[0];
+
+    for(int i = 0; i < population.size(); i++)
+    {
+        delete(population[i]);
+    }
+
+    std::cout << "Best error: " << errors.back() <<std::endl;
+
+    return result_genome;
 }
 
 

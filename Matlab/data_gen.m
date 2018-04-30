@@ -43,6 +43,8 @@ for n = 1:99
     trend_targetFunc(n) = targetFunc(n) - targetFunc(n+1);
 end
 
-out = [flipud(trend_noise1) flipud(trend_noise2) flipud(trend_func1) flipud(trend_func2) flipud(trend_targetFunc)];
+space(end)=[];
+
+out = [flipud(space) flipud(trend_noise1) flipud(trend_noise2) flipud(trend_func1) flipud(trend_func2) flipud(trend_targetFunc)];
 
 dlmwrite('training_data.txt',out, 'delimiter',' ');
