@@ -22,7 +22,7 @@
 
 const int X = 5;                    // X is the length of the data (how many variables we consider)
 const int MAX_THREADS = 4;          // max number of threads the program will use (could switch to system value later)
-const int GENOME_LENGTH = 4;        // length of each genome
+const int GENOME_LENGTH = 6;        // length of each genome
 const int POP_SIZE = 100;           // size of each population
 const int SEED_SIZE = POP_SIZE/10;  // how much of each population retained between
 
@@ -208,6 +208,11 @@ int main()
         }
         population.erase(population.begin() + SEED_SIZE, population.end());
 
+        if(mut_lvl < 0.1)
+        {
+            std::cout<<std::endl;
+        }
+
         // create new genomes from the seeds left in the population
         std::vector<genome*> newTrousers; // new genomes created from seeds
         for(int i = 0; i < population.size(); i++)
@@ -221,7 +226,7 @@ int main()
         for(int i = 0; i < newTrousers.size(); i++)
             population.push_back(newTrousers[i]);
 
-        mut_lvl = mut_lvl - 0.1;
+        mut_lvl = mut_lvl - 0.01;
     }
 
 
@@ -327,25 +332,28 @@ genome* gen_genome_from_seed (genome* seed, float mut_lvl)
     // if not, tweak the scaling function
     float decidor;
     std::vector<gene*> seed_genes = seed->genes;
+    std::vector<gene*> gen_genes;
 
     for(int i =0; i < seed_genes.size(); i++)
     {
         decidor = RandomFloat(0, 1);
         if(decidor > mut_lvl)
         {   // replace the gene
-            delete(seed_genes[i]);                    // TODO MEMORY LEAK
-            seed_genes.erase(seed_genes.begin() + i);
-            seed_genes.push_back(new gene);
+            gen_genes.push_back(new gene);
         }
         else
-        {
-            seed_genes[i]->mutate(mut_lvl);  // mutate the k-value
+        {   // mutate the gene
+            // create new gene, copy the old gene, mutate it.
+            gene* temp = new gene;
+            *temp = *seed_genes[i];
+            temp->mutate(mut_lvl);
+            gen_genes.push_back(temp);
         }
     }
 
     // create a new genome and copy the new genes into it
     genome* result_genome = new genome;
-    result_genome->genes = seed_genes;
+    result_genome->genes = gen_genes;
 
     return result_genome;
 
