@@ -1,6 +1,6 @@
 /*
  * Issues:
- *  none
+ *  testGenome is not actually testing the genome
  *
  * todo:
  *  badly needs threading
@@ -14,7 +14,6 @@
 #include <functional>
 #include <thread>
 #include <fstream>
-#include <stdlib.h>
 #include <math.h>
 #include <algorithm>
 
@@ -23,9 +22,7 @@
 
 
 std::vector<std::vector<float>> loadTrainingData(std::string fileAdr);
-
 int fetchInt();
-bool fetchYN();
 
 int main()
 {
@@ -48,6 +45,8 @@ int main()
 
     // switch case variables
     std::vector<std::vector<float>> trainingData;
+    std::vector<std::vector<float>> growData;
+    std::vector<std::vector<float>> evalData;
     genome* working_gennome;
     int good_results;
     float results_ratio;
@@ -67,11 +66,11 @@ int main()
 
             targetIndex = 6;
 
-            working_gennome = growGenome(trainingData);
+            working_gennome = growGenome(trainingData, targetIndex);
 
-            good_results = testGenome(trainingData, working_gennome);
+            good_results = testGenome(trainingData, working_gennome, targetIndex);
 
-            results_ratio = 100*(((float) good_results)/99);
+            results_ratio = 100*(((float) good_results)/(trainingData.size()-1));
 
             std::cout<<"DARWIN_TRADER - Best Genome prediction accuracy: " << results_ratio << "%" <<std::endl;
 
@@ -79,12 +78,48 @@ int main()
 
         case 2:
 
-            // load and parse historical data
+            trainingData = loadTrainingData("crypto_combined.txt");
+            if(trainingData.size() < 1)
+            {
+                std::cout << "DARWIN_TRADER - Unable to load data. Please ensure files are in correct directories" << std::endl;
+                break;
+            }
+
+            data_length = trainingData[0].size();   // set the global data size for the genes
+
+            std::cout << "DARWIN_TRADER - Data from 2017/01/22 to 2018/2/20 available. First half will be used to train a Genome," << std::endl;
+            std::cout << "DARWIN_TRADER - the second half will be used to evaluate it. Please choose a target currency:" << std::endl;
+            std::cout << "DARWIN_TRADER - Bitcoin(1) Ripple(2) Litecoin(3) Monero(4) Dash(5) Nem(6) Ethereum(7) Waves(8) Ethereum Classic(9)" << std::endl;
+
+            userInt = 0;
+            while(userInt < 1 || userInt > 9)
+                userInt = fetchInt();
+
+            targetIndex = userInt;
+
+
+            // split the string into grow and evalutation sections
+            for(int i = 0; i < trainingData.size()/2; i++)
+            {
+                growData.push_back(trainingData[i]);
+            }
+            for(int i = trainingData.size()/2; i <trainingData.size(); i++)
+            {
+                evalData.push_back(trainingData[i]);
+            }
+
+            working_gennome = growGenome(growData, targetIndex);
+
+            good_results = testGenome(evalData, working_gennome, targetIndex);
+
+            results_ratio = 100*(((float) good_results)/(evalData.size()-1));
+
+            std::cout<<"DARWIN_TRADER - Best Genome prediction accuracy: " << results_ratio << "%" <<std::endl;
 
             break;
 
         case 3:
-            // handle this
+            //exit
             break;
 
         default:
@@ -137,7 +172,7 @@ std::vector<std::vector<float>> loadTrainingData(std::string fileAdr)
 }
 
 
-//-------------UTILITY FUNCTIONS-------(Written by Alan Bannon and so useful they end up in most of my projects)--------
+//-------------UTILITY FUNCTION-------(Written by Alan Bannon and so useful it ends up in most of my projects)----------
 
 //Fetches an integer from the user and avoids crashes when char string is input into scanf
 int fetchInt()
@@ -163,26 +198,6 @@ int fetchInt()
     return inputInt;
 }
 
-//Fetches a true/false form the user with y/n
-bool fetchYN()
-{
-    std::string userInput;
-
-    bool flowControl = false;
-    while(!flowControl)
-    {
-        std::getline(std::cin, userInput);
-
-        if(userInput == "Y" || userInput == "y")
-        {
-            return true;
-        }
-        if(userInput == "N" || userInput == "n")
-        {
-            return false;
-        }
-    }
-}
 
 
 

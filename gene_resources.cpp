@@ -213,7 +213,7 @@ bool compareByError(const genome *a, const genome *b)
 }
 
 // takes a matrix of training data and returns an optimised genome
-genome* growGenome(std::vector<std::vector<float>> trainingData)
+genome *growGenome(std::vector<std::vector<float>> trainingData, int targetIndex)
 {
     std::vector<float> errors;
 
@@ -249,7 +249,7 @@ genome* growGenome(std::vector<std::vector<float>> trainingData)
             for(int i = 0; i < population.size(); i++)
             {
                 result = population[i]->produce(trainingData[j]);
-                real = trainingData[j+1].back();  // look at the next true data value
+                real = trainingData[j+1][targetIndex];  // look at the next true data value
                 population[i]->error += abs(real - result);
             }
         }
@@ -316,13 +316,24 @@ genome* growGenome(std::vector<std::vector<float>> trainingData)
 inline bool SameSign(float a, float b) {
     return a*b >= 0.0f;
 }
-int testGenome(std::vector<std::vector<float>> trainingData, genome* testGenome)
+int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome, int targetIndex)
 {
     int result = 0;
 
+    std::vector<float> dataTrend;
     for(int i = 0; i < trainingData.size()-1; i++)
     {
-        if(SameSign(testGenome->produce(trainingData[i]),trainingData[i+1].back())) // if the predictions agree
+        dataTrend.push_back(trainingData[i+1][targetIndex] - trainingData[i][targetIndex]);
+    }
+    std::vector<float> resultTrend;
+    for(int i = 0; i < trainingData.size()-1; i++)
+    {
+        resultTrend.push_back(testGenome->produce(trainingData[i+1]) - testGenome->produce(trainingData[i]));
+    }
+
+    for(int i = 0; i < resultTrend.size(); i++)
+    {
+        if(SameSign(dataTrend[i],resultTrend[i])) // if the predictions agree
             result++;
     }
 
