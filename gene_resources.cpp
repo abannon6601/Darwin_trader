@@ -7,12 +7,16 @@
 #include <functional>
 #include <algorithm>
 #include <iostream>
+#include <thread>
+#include <future>
 
 #include "random_range.h"
 #include "gene_functions_H.h"
 #include "main.h"
 
 std::vector <std::function<float(float,float,float)>> functions; // global list of function pointers
+
+int data_length;                    // data_length is the length of the data (how many variables we consider)
 
 gene::gene() {
     // set sign
@@ -25,7 +29,7 @@ gene::gene() {
     k = RandomFloat(-1.0f, 1.0f);
 
     //set dataIndex
-    dataIndex = RandomInt(0,X);
+    dataIndex = RandomInt(0,data_length);
 
     int accessInt = RandomInt(0,functions.size() - 1);
     //std::cout << "DEBUG: acess int: " << accessInt << " functions size: " << functions.size() << std::endl;
@@ -220,7 +224,14 @@ genome* growGenome(std::vector<std::vector<float>> trainingData)
         population.push_back(new genome);
     }
 
-    float mut_lvl = 1;   // start the mutation at 50%
+    int MAX_THREADS = std::thread::hardware_concurrency();
+    if(MAX_THREADS < 1)
+        MAX_THREADS = 4;    // the call may not always return, so 4 is a safe bet.
+
+    std::cout<<"DARWIN_TRADER - Growning algorithm with " << MAX_THREADS << " threads supported"<<std::endl;
+    std::vector<std::thread> training_threads;
+
+    float mut_lvl = 1;   // start the mutation at 50% (average mutation is 1/2 of mut_lvl as mut_lvl acts on a normal dist)
 
     int breakout = 0;   // used to stop stagnation;
     int allowed_breakouts = 50;
@@ -253,18 +264,18 @@ genome* growGenome(std::vector<std::vector<float>> trainingData)
         }
         population.erase(population.begin() + SEED_SIZE, population.end());
 
-
+        // if we have exactly the same error as before
         if(errors.size() > 0)
             if(population[0]->error == errors.back())
-                breakout++;
+                breakout++; // increase the counter
 
+        // if the top error hasn't improved over five itterations
         if(breakout > 5 && breakouts < allowed_breakouts)
         {
             breakout = 0;
             breakouts++;
             mut_lvl = 1;    // start at a higher mutation again
         }
-
 
         errors.push_back(population[0]->error);
         //std::cout<<"Darwin_Trader: Training - best error: " << population[0]->error << std::endl;
@@ -292,7 +303,11 @@ genome* growGenome(std::vector<std::vector<float>> trainingData)
         delete(population[i]);
     }
 
-    std::cout << "Best error: " << errors.back() <<std::endl;
+    //std::cout << "Best error: " << errors.back() <<std::endl;
+
+
+    std::cout << "DARWIN_TRADER - " << errors.size()*POP_SIZE <<" Genomes considered over " << errors.size() << " mutate//cull cycles" <<std::endl;
+
 
     return result_genome;
 }

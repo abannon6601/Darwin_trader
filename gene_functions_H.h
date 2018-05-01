@@ -11,6 +11,7 @@
 
 
 extern std::vector <std::function<float(float,float,float)>> functions;
+extern int data_length;
 
 void    set_func_arry();
 
