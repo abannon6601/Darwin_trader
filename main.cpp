@@ -1,6 +1,6 @@
 /*
  * Issues:
- *  testGenome is not actually testing the genome
+ *  none
  *
  * todo:
  *  badly needs threading
