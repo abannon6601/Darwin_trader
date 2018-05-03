@@ -104,7 +104,7 @@ float func_sin_1(float sign, float k,  float x)
 {
     float result = sign*sin(k*x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -114,7 +114,7 @@ float func_sin_2(float sign, float k,  float x)
 {
     float result = sign*k*sin(x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -124,7 +124,7 @@ float func_exp_1(float sign, float k,  float x)
 {
     float result = sign*pow(x,k);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -134,7 +134,7 @@ float func_exp_2(float sign, float k,  float x)
 {
     float result = sign*pow(k,x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -144,7 +144,7 @@ float func_lin_1(float sign, float k,  float x)
 {
     float result = sign*(k*x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -154,7 +154,7 @@ float func_const(float sign, float k,  float x)
 {
     float result = sign*k;
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -164,7 +164,7 @@ float func_log_1(float sign, float k,  float x)
 {
     float result = sign*k*log(x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -242,7 +242,7 @@ int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome,
     }
 
 
-    std::cout<< "Test function trial. Genome name: " << testGenome << " Produce at data 0: " <<testGenome->produce(trainingData[0]) << "target index " << targetIndex << std::endl;
+    std::cout<< "Test function trial. Genome name: " << testGenome << " Produce at data 0: " <<testGenome->produce(trainingData[0]) << " target index " << targetIndex << std::endl;
     /*
     /// DEBUG REMOVE
     std::cout<<"Results:    Data:"<<std::endl;
