@@ -241,6 +241,13 @@ int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome,
             result++;
     }
 
+    /// DEBUG REMOVE
+    std::cout<<"Results:    Data:"<<std::endl;
+    for(int i = 0; i < resultTrend.size(); i++)
+    {
+        std::cout<< resultTrend[i] <<"     "<< dataTrend[i] << std::endl;
+    }
+
     return result;
 }
 
