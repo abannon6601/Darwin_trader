@@ -241,17 +241,6 @@ int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome,
             result++;
     }
 
-
-    std::cout<< "Test function trial. Genome name: " << testGenome << " Produce at data 0: " <<testGenome->produce(trainingData[0]) << " target index " << targetIndex << std::endl;
-    /*
-    /// DEBUG REMOVE
-    std::cout<<"Results:    Data:"<<std::endl;
-    for(int i = 0; i < resultTrend.size(); i++)
-    {
-        std::cout<< resultTrend[i] <<"     "<< dataTrend[i] << std::endl;
-    }
-     */
-
     return result;
 }
 
