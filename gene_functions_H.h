@@ -67,8 +67,8 @@ public:
 
 bool    compareByError(const genome *a, const genome *b);
 genome* gen_genome_from_seed(genome* seed, float mut_lvl);
-genome *growGenome(std::vector<std::vector<float>> trainingData, int targetIndex);
-int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome, int targetIndex);
+genome* growGenome(std::vector<std::vector<float>> trainingData, int targetIndex);
+int testGenome(std::vector<std::vector<float>> trainingData, genome* testGenome, int targetIndex);
 
 
 

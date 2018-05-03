@@ -220,7 +220,7 @@ bool compareByError(const genome *a, const genome *b)
 inline bool SameSign(float a, float b) {
     return a*b >= 0.0f;
 }
-int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome, int targetIndex)
+int testGenome(std::vector<std::vector<float>> trainingData, genome* ktestGenome, int targetIndex)
 {
     int result = 0;
 
@@ -251,7 +251,7 @@ void do_join(std::thread& t)
 }
 
 // takes a matrix of training data and returns an optimised genome
-genome *growGenome(std::vector<std::vector<float>> trainingData, int targetIndex)
+genome* growGenome(std::vector<std::vector<float>> trainingData, int targetIndex)
 {
     std::vector<float> errors;
 

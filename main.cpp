@@ -110,6 +110,8 @@ int main()
 
             working_gennome = growGenome(growData, targetIndex);
 
+
+
             good_results = testGenome(evalData, working_gennome, targetIndex);
 
             results_ratio = 100*(((float) good_results)/(evalData.size()-1));
