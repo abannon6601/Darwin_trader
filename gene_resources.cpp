@@ -242,7 +242,7 @@ int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome,
     }
 
 
-    std::cout<< "Test function trial: " <<testGenome->produce(trainingData[0]) << std::endl;
+    std::cout<< "Test function trial. Genome name: " << testGenome << " Produce at data 0: " <<testGenome->produce(trainingData[0]) << "target index " << targetIndex << std::endl;
     /*
     /// DEBUG REMOVE
     std::cout<<"Results:    Data:"<<std::endl;
