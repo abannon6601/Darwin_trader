@@ -266,7 +266,7 @@ genome *growGenome(std::vector<std::vector<float>> trainingData, int targetIndex
     if(MAX_THREADS < 1)
         MAX_THREADS = 4;    // the call may not always return, so 4 is a safe bet.
 
-    std::cout<<"DARWIN_TRADER - Growing algorithm with " << MAX_THREADS << " threads supported"<<std::endl;
+    std::cout<<"DARWIN_TRADER - Growing genome with " << MAX_THREADS << " threads supported"<<std::endl;
     std::vector<std::thread> training_threads;
 
     float mut_lvl = 1;   // start the mutation at 50% (average mutation is 1/2 of mut_lvl, as mut_lvl acts on a flat dist)
