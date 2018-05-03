@@ -116,6 +116,7 @@ int main()
 
             results_ratio = 100*(((float) good_results)/(evalData.size()-1));
 
+            std::cout<<"DARWIN_TRADER - Best Genome correct predictions: " << good_results <<std::endl;
             std::cout<<"DARWIN_TRADER - Best Genome prediction accuracy: " << results_ratio << "%" <<std::endl;
 
             break;
