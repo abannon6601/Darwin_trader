@@ -173,7 +173,7 @@ float func_log_1(float sign, float k,  float x)
 //----------------------------------------------------------------------------------------------------------------------
 
 // generate a mutated genome from a given seed genome and mutation level
-genome* gen_genome_from_seed (genome* seed, float mut_lvl)
+genome* gen_genome_from_seed (genome *seed, float mut_lvl)
 {
     // TODO
     // go through each gene
@@ -220,7 +220,7 @@ bool compareByError(const genome *a, const genome *b)
 inline bool SameSign(float a, float b) {
     return a*b >= 0.0f;
 }
-int testGenome(std::vector<std::vector<float>> trainingData, genome* ktestGenome, int targetIndex)
+int testGenome(std::vector<std::vector<float>> trainingData, genome *testGenome, int targetIndex)
 {
     int result = 0;
 
