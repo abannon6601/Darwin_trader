@@ -3,7 +3,7 @@
  *  none
  *
  * todo:
- *  badly needs threading
+ *
  *
  */
 
@@ -64,7 +64,7 @@ int main()
 
             data_length = trainingData[0].size();   // set the global data size for the genes
 
-            targetIndex = 6;
+            targetIndex = 5;
 
             working_gennome = growGenome(trainingData, targetIndex);
 
@@ -138,7 +138,7 @@ int main()
 
 //-------------other----------------------------------------------------------------------------------------------------
 
-//load training data from a text file TODO: make this robust
+//load training data from a text file
 std::vector<std::vector<float>> loadTrainingData(std::string fileAdr)
 {
     std::vector<std::vector<float>> fileData;

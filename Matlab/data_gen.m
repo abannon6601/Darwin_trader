@@ -27,24 +27,12 @@ plot(space, func1, 'r--');
 plot(space, func2, 'b--');
 plot(space, targetFunc);
 
-trend_noise1 = ones(99,1);
-trend_noise2 = ones(99,1);
-trend_func1 = ones(99,1);
-trend_func2 = ones(99,1);
-trend_targetFunc = ones(99,1);
+xlabel('X');
+ylabel('Y');
+title('Sample training data');
 
-for n = 1:99
-    trend_noise1(n) = noise1(n) - noise1(n+1); 
-    trend_noise2(n) = noise2(n) - noise2(n+1); 
-    
-    trend_func1(n) = func1(n) -  func1(n+1);
-    trend_func2(n) = func2(n) -  func2(n+1);
-    
-    trend_targetFunc(n) = targetFunc(n) - targetFunc(n+1);
-end
+out = [flipud(space) flipud(noise1) flipud(noise2) flipud(func1) flipud(func2) flipud(targetFunc)];
 
-space(end)=[];
-
-out = [flipud(space) flipud(trend_noise1) flipud(trend_noise2) flipud(trend_func1) flipud(trend_func2) flipud(trend_targetFunc)];
+legend('Noise Channel 1', 'Noise Channel 2', 'Function 1', 'Function 2' , 'Compound Function');
 
 dlmwrite('training_data.txt',out, 'delimiter',' ');
