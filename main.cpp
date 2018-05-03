@@ -110,7 +110,7 @@ int main()
 
             working_gennome = growGenome(growData, targetIndex);
 
-
+            std::cout<<"DARWIN_TRADER - Best Genome name: " << working_gennome <<std::endl;
 
             good_results = testGenome(evalData, working_gennome, targetIndex);
 
