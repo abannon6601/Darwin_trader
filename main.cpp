@@ -111,6 +111,7 @@ int main()
             working_gennome = growGenome(growData, targetIndex);
 
             std::cout<<"DARWIN_TRADER - Best Genome name: " << working_gennome <<std::endl;
+            std::cout<<"DARWIN_TRADER - Best Genome dataIndex of gene 0: " << working_gennome->genes[0]->get_dataIndex() <<std::endl;
 
             good_results = testGenome(evalData, working_gennome, targetIndex);
 
