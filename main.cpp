@@ -68,10 +68,13 @@ int main()
 
             working_gennome = growGenome(trainingData, targetIndex);
 
-            good_results = testGenome(trainingData, working_gennome, targetIndex);
+            std::cout<<"DARWIN_TRADER - Best Genome name: " << working_gennome <<std::endl;
 
+            good_results = testGenome(trainingData, working_gennome, targetIndex);
+            
             results_ratio = 100*(((float) good_results)/(trainingData.size()-1));
 
+            std::cout<<"DARWIN_TRADER - Best Genome correct predictions: " << good_results <<std::endl;
             std::cout<<"DARWIN_TRADER - Best Genome prediction accuracy: " << results_ratio << "%" <<std::endl;
 
             break;
@@ -110,10 +113,13 @@ int main()
 
             working_gennome = growGenome(growData, targetIndex);
 
+            std::cout<<"DARWIN_TRADER - Best Genome name: " << working_gennome <<std::endl;
+
             good_results = testGenome(evalData, working_gennome, targetIndex);
 
             results_ratio = 100*(((float) good_results)/(evalData.size()-1));
 
+            std::cout<<"DARWIN_TRADER - Best Genome correct predictions: " << good_results <<std::endl;
             std::cout<<"DARWIN_TRADER - Best Genome prediction accuracy: " << results_ratio << "%" <<std::endl;
 
             break;

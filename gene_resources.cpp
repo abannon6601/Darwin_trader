@@ -104,7 +104,7 @@ float func_sin_1(float sign, float k,  float x)
 {
     float result = sign*sin(k*x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -114,7 +114,7 @@ float func_sin_2(float sign, float k,  float x)
 {
     float result = sign*k*sin(x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -124,7 +124,7 @@ float func_exp_1(float sign, float k,  float x)
 {
     float result = sign*pow(x,k);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -134,7 +134,7 @@ float func_exp_2(float sign, float k,  float x)
 {
     float result = sign*pow(k,x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -144,7 +144,7 @@ float func_lin_1(float sign, float k,  float x)
 {
     float result = sign*(k*x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -154,7 +154,7 @@ float func_const(float sign, float k,  float x)
 {
     float result = sign*k;
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -164,7 +164,7 @@ float func_log_1(float sign, float k,  float x)
 {
     float result = sign*k*log(x);
 
-    if(isnan(result))
+    if(isnan(result) || isinf(result))
         result = 0;
 
     return result;
@@ -173,7 +173,7 @@ float func_log_1(float sign, float k,  float x)
 //----------------------------------------------------------------------------------------------------------------------
 
 // generate a mutated genome from a given seed genome and mutation level
-genome* gen_genome_from_seed (genome* seed, float mut_lvl)
+genome* gen_genome_from_seed (genome *seed, float mut_lvl)
 {
     // TODO
     // go through each gene
@@ -251,7 +251,7 @@ void do_join(std::thread& t)
 }
 
 // takes a matrix of training data and returns an optimised genome
-genome *growGenome(std::vector<std::vector<float>> trainingData, int targetIndex)
+genome* growGenome(std::vector<std::vector<float>> trainingData, int targetIndex)
 {
     std::vector<float> errors;
 
